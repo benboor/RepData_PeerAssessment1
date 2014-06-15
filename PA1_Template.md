@@ -7,7 +7,8 @@ The data can be found at https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2F
 
 
 
-```{r}
+
+```r
 #		the following is housecleaning/preprocessing code
 #		sets echo= true so R code "under the hood" can be seen
 	knitr::opts_chunk$set(echo=TRUE)
@@ -25,12 +26,13 @@ The data can be found at https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2F
 #		strptime function converts date and time into one POSIXlt object
 	activityData$datetime <- strptime(paste(format(activityData$date, "%Y-%m-%s"), sprintf("%04d",
 	activityData$interval)), "%Y-%m-%s %H%M")
-```	
+```
 	
 
 # What is the mean number of total steps taken per day?	
 
-```{r}
+
+```r
 #		What is the mean number of steps taken per day
 	steps.per.day <- with(activityData, tapply(steps, as.Date(date), sum, na.rm = TRUE))
 
@@ -38,8 +40,30 @@ The data can be found at https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2F
 	hist(steps.per.day, col = "grey", main = "Total number of steps taken each day", right = FALSE, density = 150, xlab = "steps per day", ylab = "rate of occurence of steps", axes = TRUE)
 ```
 
-```{r}
+![plot of chunk unnamed-chunk-2](figure/unnamed-chunk-2.png) 
+
+
+```r
 	summary(activityData)
+```
+
+```
+##      steps            date               interval   
+##  Min.   :  0.0   Min.   :2012-10-01   Min.   :   0  
+##  1st Qu.:  0.0   1st Qu.:2012-10-16   1st Qu.: 589  
+##  Median :  0.0   Median :2012-10-31   Median :1178  
+##  Mean   : 37.4   Mean   :2012-10-31   Mean   :1178  
+##  3rd Qu.: 12.0   3rd Qu.:2012-11-15   3rd Qu.:1766  
+##  Max.   :806.0   Max.   :2012-11-30   Max.   :2355  
+##  NA's   :2304                                       
+##     datetime                  
+##  Min.   :2012-10-01 00:00:00  
+##  1st Qu.:2012-10-16 05:58:45  
+##  Median :2012-10-31 11:57:30  
+##  Mean   :2012-10-31 12:23:59  
+##  3rd Qu.:2012-11-15 17:56:15  
+##  Max.   :2012-11-30 23:55:00  
+## 
 ```
 
 The mean  steps taken per day is 9354.2295.
@@ -53,7 +77,8 @@ The median steps taken per day is 10395.
 intervals
 
 # What is the average daily activity pattern?
-```{r}
+
+```r
 #		average number of steps taken per interval
 	steps.avg <- with(activityData, tapply(steps, interval, mean, na.rm = TRUE))
 	steps.avg.time <- as.POSIXct(strptime(sprintf("%04d", as.numeric(names(steps.avg))), "%H%M"))
@@ -69,12 +94,15 @@ intervals
 	abline(v = as.POSIXct(interval.max), lty = 1, lwd = 2, col = "blue")
 ```
 
+![plot of chunk unnamed-chunk-4](figure/unnamed-chunk-4.png) 
+
 On average the maximum number of steps happens at 08:35.
 
 # Inputting missing values
 
 
-```{r}
+
+```r
 #		object of missing values
 	missing <- sum(is.na(activityData$steps))
 ```
@@ -83,7 +111,8 @@ On average the maximum number of steps happens at 08:35.
 There are 2304 missing values in the raw data.
 Every missing value is filled in with the mean number of steps taken that hour.
 
-```{r}
+
+```r
 #		 the activity data needs to be cleaned of missing values
 	activityData.clean <- activityData
 
@@ -91,13 +120,17 @@ Every missing value is filled in with the mean number of steps taken that hour.
 	activityData.clean$steps[is.na(activityData.clean$steps)] <- steps.avg[match(activityData$interval[is.na(activityData$steps)], names(steps.avg))]
 ```
 
-```{r}
+
+```r
 #		 histogram of steps per day
 	steps.per.day.clean <- with(activityData.clean, tapply(steps, as.Date(date), sum, na.rm = TRUE))
 	hist(steps.per.day.clean, col = "grey", main = "Steps per day", density = 150, xlab = "Steps per day", ylab = "rate of occurence of steps", axes = TRUE)
 ```
 
-```{r}
+![plot of chunk unnamed-chunk-7](figure/unnamed-chunk-7.png) 
+
+
+```r
 #		the mean and median are cleaned
 	meanClean <- mean(steps.per.day.clean)
 	medianClean <- median(steps.per.day.clean)
@@ -110,7 +143,8 @@ The median number of steps taken per day is 10766.
 
 # Are there differences in activity patterns between weekdays and weekends?
 
-```{r}
+
+```r
 #		The weekday/weekend sets are segregated 		
 	wday.group <- factor(c("Weekend", rep("Weekday", 5), "Weekend"))
 	activityData.clean$wday <- wday.group[as.POSIXlt(activityData.clean$datetime)$wday +  1]
@@ -143,3 +177,5 @@ The median number of steps taken per day is 10766.
 	axis(side = 1, at = c(axis.timePeriod), labels = format(axis.timePeriod, format = "%H:%M"))
 	abline(v = as.POSIXct(weekday[which.max(weekday$steps.avg), ]$interval), lty = 1, lwd = 2, col = "blue")
 ```
+
+![plot of chunk unnamed-chunk-9](figure/unnamed-chunk-9.png) 
